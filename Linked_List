@@ -1,0 +1,173 @@
+#include<iostream>
+
+using namespace std;
+
+typedef struct Node {
+	int data;
+	Node  *next;
+}Node, *LinkList;
+
+
+void InitList(LinkList &L);
+void Create(LinkList &L, int n);
+void GetItem(LinkList L, int i, int &result);
+LinkList Locate(LinkList L, int e);
+void Insert(LinkList &L, int i, int e);
+void DeleteNode(LinkList &L, int i);
+void DeleteList(LinkList &L);
+void PrintList(LinkList L);
+
+int main() {
+	int ch = 0, num = 0, result = 0, i = 0,e=0;
+	LinkList list;
+	InitList(list);
+	cout << "链表初始化成功！请选择功能：\n1、为链表L输入n个数据\n2、获得第i个元素\n3、判断e是否在链表中\n4、在i处插入新结点\n5、删除第i个结点\n6、删除所有结点\n7、输出链表\n0、退出" << endl;
+	cin >> ch;
+	while (ch != 0) {
+		switch (ch)
+		{
+		case 1:
+			cout << "请输入数据个数n：" << endl;
+			cin >> num;
+			Create(list, num);
+			cout << "创建成功" << endl;
+			break;
+		case 2:
+			cout<< "请输入元素的序号i：" << endl;
+			cin >> i;
+			GetItem(list, i, result);
+			cout << "result = " << result << endl;
+			break;
+		case 3:
+			cout << "请输入带查找元素i" << endl;
+			cin >> i;
+			Locate(list, i);
+			break;
+		case 4:
+			cout << "输入在哪里插入结点, 插入的数值为多少" << endl;
+			cin >> i >> e;
+			Insert(list, i, e);
+			break;
+		case 5:
+			cout << "输入要删除的结点i:" << endl;
+			cin >> i;
+			DeleteNode(list, i);
+			cout << "删除成功" << endl;
+			break;
+		case 6:
+			DeleteList(list);
+			cout << "删除成功" << endl;
+			break;
+		case 7:
+			PrintList(list);
+		default:
+			break;
+		}
+		cin >> ch;
+	}
+	return 0;
+}
+
+//0、初始化链表
+void InitList(LinkList &L) {
+	L = new Node;
+	L->next = NULL;
+}
+
+//1、为链表L输入n个数据
+void Create(LinkList &L, int n) {
+	LinkList r;
+	r = L;			//r为尾指针
+	for (int i = 0; i < n; ++i) {
+		Node *p = new Node;		//p为新建的最后一个结点
+		cin >> p->data;
+		p->next = NULL;
+		r->next = p;
+		r = p;
+	}
+}
+
+//2、获得第i个元素
+void GetItem(LinkList L, int i, int &result) {
+	LinkList p = L->next;
+	int j = 1;
+	while (p!=NULL&&j < i) {
+		p = p->next;
+		j++;
+	}
+	if (p == NULL || j > i) {
+		cout << "Error" << endl;
+		exit(-1);
+	}
+	result = p->data;
+}
+
+//3、判断e是否在链表中
+LinkList Locate(LinkList L, int e) {
+	int i = 1;
+	LinkList p = L->next;
+	while (p != NULL && p->data != e) {
+		p = p->next;
+		i++;
+	}
+	cout << "e是第 " << i << "个" << endl;
+	return p;
+}
+
+//4、在i处插入新结点e
+void Insert(LinkList &L, int i, int e) {
+	LinkList p = L;
+	int j = 0;
+	while (p != NULL && (j < i - 1)) {
+		p = p->next;
+		j++;
+	}
+	//if (p != NULL || j > i - 1) {
+	//	exit(-1);
+	//}
+	Node *s = new Node;
+	s->data = e;
+	s->next = p->next;
+	p->next = s;
+}
+
+//5、删除第i个结点
+void DeleteNode(LinkList &L, int i) {
+	LinkList p = L,q;
+	int j = 0;
+	while ((p->next) && (j < i - 1)) {
+		p = p->next;
+		j++;
+	}
+	//if (p->next != 0 || (j > i - 1)) {
+	//	exit(-2);
+	//}
+	q = p->next;
+	p->next = q->next;
+	delete p;
+}
+
+//6、删除所有结点
+void DeleteList(LinkList &L) {
+	LinkList p = L;
+	while (p->next != NULL) {
+		L = L->next;
+		delete p;
+		p = L;
+	}
+}
+
+//7、输出链表
+void PrintList(LinkList L) {
+	LinkList p = L->next;
+	if (p == NULL) {
+		cout << "Empty List";
+	}
+	while (p) {
+		cout << p->data;
+		if (p->next != NULL) {
+			cout << ' ';
+		}
+		p = p->next;
+	}
+}
