@@ -1,0 +1,169 @@
+#include<iostream>
+
+using namespace std;
+
+typedef struct {
+	int *data;		//当前地址
+	int length;		//总长
+}SqList;
+
+#define OK 1;
+#define ERROR 0;
+
+int InitList(SqList &L);
+void Create(SqList &L, int n);
+int GetElem(SqList L, int i, int &e);
+void Locate(SqList &L, int e);
+int Insert(SqList &L, int i, int e);
+int Delete(SqList &L, int i);
+void PrintList(SqList &L, int n);
+
+int main() {
+	int ch = 0, n = 0, e = 0, num = 0;
+	SqList list;
+	InitList(list);
+	cout << "顺序表初始化成功！请选择功能：\n1、创建并初始化数据\n2、得到第i个值\n3、定位数值为i的元素\n4、在i后插入e\n5、删除第i个元素\n6、输出\n0、退出" << endl;
+	cin >> ch;
+	while (ch != 0) {
+		switch (ch)
+		{
+		case 1:
+			cout << "请输入元素个数:" << endl;
+			cin >> num;
+			Create(list, num);
+			break;
+		case 2:
+			cout << "请输入i" << endl;
+			cin >> n;
+			GetElem(list, n, e);
+			cout << "back = " << e << endl;;
+			break;
+		case 3:
+			cout << "请输入i" << endl;
+			cin >> n;
+			Locate(list, n);
+			break;
+		case 4:
+			cout << "输入i和e" << endl;
+			cin >> n >> e;
+			Insert(list, n, e);
+			break;
+		case 5:
+			cout << "输入i" << endl;
+			cin >> n;
+			Delete(list, n);
+			break;
+		case 6:
+			PrintList(list,num);
+			break;
+		default:
+			break;
+		}
+		cin >> ch;
+	}
+	
+	return 0;
+}
+
+//1.初始化
+int InitList(SqList &L) {
+	L.data = new int[100];		//分配空间
+	if (L.data == 0) {
+		exit(OVERFLOW);		//分配失败退出
+	}
+	L.length = 0;		//长度为0
+	return OK;
+}
+
+//2.创建顺序表并输入数据
+void Create(SqList &L, int n) {
+	for (int i = 0; i < n; i++) {
+		cin >> L.data[i];
+		L.length++;
+	}
+	cout << "OK" << endl;
+	return;
+}
+
+//3.判断i是否合理；若合理，回传第i个数
+int GetElem(SqList L, int i, int &e) {
+	int result = OK;
+	if (i<1 || i>L.length) {
+		result = ERROR;
+	}
+	else {
+		e = L.data[i - 1];
+	}
+	cout << "OK" << endl;
+	return result;
+}
+
+//4.查找e是否在表中,若在，输出e是第几个
+void Locate(SqList &L, int e) {
+	int re=0;
+	for (int i = 0; i < L.length; i++) {
+		if (L.data[i] == e) {
+			re = i + 1;
+			break;
+		}
+	}
+	if (re!=0) {
+		cout << "Yes, the " << re << " one" << endl;
+	}
+	else {
+		cout << "No" << endl;
+	}
+}
+
+//5.判断插入位置是否合法，插入后将之后的元素向后移动一个位置，表长加一
+int Insert(SqList &L, int i, int e) {
+	//在第i个插入e，1<=i<=L.length+1
+	int result = 0;
+	if ((i < 1) || (i > L.length + 1)) {
+		result = ERROR;
+	}
+	else if (L.length == 100) {
+		result = ERROR;
+	}
+	else {
+		for (int j = L.length - 1; j >= i - 1; j--) {
+			L.data[j + 1] = L.data[j];
+		}
+		L.data[i - 1] = e;
+		L.length++;
+		result = OK;
+	}
+	cout << "OK" << endl;
+	return result;
+}
+
+//6.判断删除位置是否合法，删除后将之后的元素向前移动一位，表长减一
+int Delete(SqList &L, int i) {
+	int result = 0;
+	if ((i < 1) || (i >  L.length)) {
+		result = ERROR;
+	}
+	else {
+		for(int j = i; j <= L.length; j++) {
+			L.data[j - 1] = L.data[j];
+		}
+		L.length--;
+		result = OK;
+	}
+	cout << "OK" << endl;
+	return result;
+}
+
+//7.输出
+void PrintList(SqList &L, int n){
+	for (int i = 0; i < n; i++) {
+		cout << L.data[i];
+		if (i + 1 != n) {
+			cout << ' ';
+		}
+		else {
+			cout << endl;
+		}
+	}
+}
+
