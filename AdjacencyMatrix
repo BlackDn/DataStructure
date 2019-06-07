@@ -1,0 +1,101 @@
+//邻接矩阵存储
+typedef struct {
+	char vex[10];	//顶点表
+	int arcs[10][10];	//邻接矩阵
+	int vexnum, arcnum;	//图的信息，顶点总数和边总数
+};
+
+/*
+输入格式：
+5 6		//顶点数，边数
+A B C D E	//五个顶点的名字
+A C 12	//顶点A到顶点E的权值
+A E 8
+B C 6
+C D 5
+D E 8
+E B 6
+*/
+
+#include <iostream>
+
+using namespace std;
+
+//邻接矩阵存储
+typedef struct {
+	char vex[10];	//顶点表
+	int arcs[10][10];	//邻接矩阵
+	int vexnum, arcnum;	//图的信息，顶点总数和边总数
+}AMGraph;
+
+//函数声明
+void Create(AMGraph &G);
+int Locate(AMGraph G, char v);
+void DFS(AMGraph G, int v);
+
+bool visited[10] = { false };
+
+int main() {
+	AMGraph graph;
+	Create(graph);
+	DFS(graph, 0);
+	
+	//输出邻接矩阵
+	//cout << endl;
+	//for (int i = 0; i < graph.vexnum; i++) {
+	//	for (int j = 0; j < graph.vexnum; j++) {
+	//		cout << graph.arcs[i][j] << " ";
+	//	}
+	//	cout << endl;
+	//}
+
+	return 0;
+}
+//创建无向图
+void Create(AMGraph &G) {
+	char v1, v2;	//接收输入的顶点
+	int x = 0, y = 0, w = 0;	//输入的边的权w，对应行标x，列表y
+
+	cin >> G.vexnum >> G.arcnum;	//总顶点、边数
+	for (int i = 0; i < G.vexnum; i++) {	//依次输入节点信息
+		cin >> G.vex[i];
+	}
+	//初始化邻接矩阵，边均为0
+	for (int i = 0; i < G.vexnum; i++) {
+		for (int j = 0; j < G.vexnum; j++) {
+			G.arcs[i][j] = 0;
+		}
+	}
+	//根据输入的图的边构造矩阵
+	for (int i = 0; i < G.arcnum; i++) {
+		cin >> v1 >> v2 >> w;
+		x = Locate(G, v1);
+		y = Locate(G, v2);
+		G.arcs[x][y] = w;
+		G.arcs[y][x] = w;
+	}
+	cout << "创建成功" << endl;
+}
+
+//根据顶点名获得其编号下标
+int Locate(AMGraph G, char v) {
+	int result = -1;
+	for (int i = 0; i < G.vexnum; i++) {
+		if (G.vex[i] == v) {
+			result = i;
+			break;
+		}
+	}
+	return result;
+}
+
+//从编号为v的节点开始深度优先搜索并输出节点名
+void DFS(AMGraph G, int v) {
+	cout << G.vex[v] << endl;
+	visited[v] = true;
+	for (int i = 0; i < G.vexnum; i++) {
+		if ((G.arcs[v][i] != 0) && (visited[i] == false)) {
+			DFS(G, i);
+		}
+	}
+}
