@@ -1,0 +1,51 @@
+typedef struct node {
+	int data;
+	node *lchild;
+	node *rchild;
+}node,*tree;
+
+//创建二叉排序树，生成有n个结点的树tree
+void createTree(tree &tree,int n) {
+	int i;
+	tree = NULL;
+	for (int i = 1; i <= n; i++) {
+		cin >> i;
+		insertTree(tree, i);
+	}
+}
+
+//插入二叉排序树，将n插入到树tree中
+void insertTree(tree &tree, int n) {
+	if (tree == NULL) {		//空结点就直接赋值
+		node *s = new node;
+		s->data = n;
+		s->lchild = NULL;
+		s->rchild = NULL;
+		tree = s;
+	}
+	else if (n < tree->data) {		//小于根就往左转移继续比较直到空
+		insertTree(tree->lchild, n);
+	}
+	else if (n > tree->data) {		//大于根就往右转移继续比较直到空
+		insertTree(tree->rchild, n);
+	}
+}
+
+//比较t1，t2两棵树是否相同
+bool sameTree(tree t1,tree t2) {
+	if (t1 == NULL && t2 == NULL) {		//两颗空树相同
+		return true;
+	}
+	else if ((t1==NULL&&t2!=NULL)||(t1!=NULL&&t2==NULL)) {		//一颗空树一颗非空树不同
+		return false;
+	}
+	else if (t1->data == t2->data) {		//根结点相同,递归比较子树
+		if (sameTree(t1->lchild, t2->lchild)) {		//如果左子树相同，比较右子树，相同则整棵树相同
+			return sameTree(t1->rchild, t2->rchild);
+		}
+		else if (sameTree(t1->lchild, t2->rchild)) {	//a的左子树和b的右子树相等，右子树和左子树相等也是相等，写法不一样而已
+			return sameTree(t1->rchild, t2->lchild);
+		}
+	}
+	return false;	//没有满足上面的就不想等
+}
