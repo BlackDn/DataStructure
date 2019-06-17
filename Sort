@@ -1,0 +1,267 @@
+#include <iostream>
+//#include "sort.h"
+
+using namespace std;
+
+#define MAXSIZE 20
+
+typedef struct {
+	int r[MAXSIZE + 1];
+	int length;
+}SqList;
+
+void initList(SqList&L, int length);
+void insertSort(SqList &L);
+void bisertSort(SqList &L);
+void shellInsert(SqList &L, int d);
+void ShellSort(SqList &L, int d[], int t);
+void bubbleSort(SqList &L);
+void quickSort(SqList &L, int low, int high);
+int Partition(SqList &L, int low, int high);
+void selectSort(SqList &L);
+void adjustHeap(SqList &L, int s, int m);
+void createHeap(SqList &L);
+void heapSort(SqList &L);
+void Merge(int oldArr[], int resArr[], int low, int mid, int high);
+void MSort(int oldArr[], int resArr[], int low, int high);
+void mergeSort(SqList &L);
+
+
+void printList(SqList L);
+
+int main() {
+	int n;
+	//int shellArray[5] = { 5,3,1 };
+	SqList list;
+	cin >> n;
+	initList(list, n);
+	mergeSort(list);
+	printList(list);
+	return 0;
+}
+
+//初始化顺序表
+void initList(SqList&L,int length) {
+	L.length = length;
+	for (int i = 1; i <= L.length; i++) {
+		cin >> L.r[i];
+	}
+}
+
+//输出顺序表
+void printList(SqList L) {
+	for (int i = 1; i <= L.length; i++) {
+		cout << L.r[i] << ' ';
+	}
+}
+
+//直接插入
+void insertSort(SqList &L) {
+	int  j;
+	for (int i = 2; i <= L.length; i++) {	//从无序序列（第二个）开始插入
+		if (L.r[i] < L.r[i - 1]) {
+			L.r[0] = L.r[i];	//设置哨兵
+			L.r[i] = L.r[i - 1];
+			for (j = i - 2; L.r[0] < L.r[j]; j--) {		//从后往前，如果当前数大于哨兵，后移并继续往前比较
+				L.r[j + 1] = L.r[j];
+			}
+			L.r[j + 1] = L.r[0];	//找到的数是小于等于r[0]的，实际位子在这个数后一个
+		}
+	}
+}
+
+//折半插入.
+//其实是在直接插入的基础上，将无序序列的第一个数在有序序列中查找的时候变为折半查找
+void bisertSort(SqList &L) {
+	int low, high, m;	//和折半查找相似，每次取中位数
+	for (int i = 2; i <= L.length; i++) {
+		L.r[0] = L.r[i];	//设置哨兵
+		low = 1;			//（有序序列）第一个数
+		high = i - 1;		//有序序列最后一个数（无序序列第一个数-1）
+		while (low <= high) {		//寻找插入位置
+			m = (low + high) / 2;
+			if (L.r[0] < L.r[m]) {		//小的在左边，high=中位数-1
+				high = m - 1;
+			}
+			else {		//大的在右边，low=中位数+1
+				low = m + 1;
+			}
+		}
+		for (int j = i - 1; j >= high + 1; j--) {		//从后往前位移
+			L.r[j + 1] = L.r[j];
+		}
+		L.r[high + 1] = L.r[0];
+	}
+}
+
+//希尔排序
+//每次的增量变化在数组d[]中体现,数组长度为t
+void ShellSort(SqList &L, int d[], int t) {
+	for (int k = 0; k < t; k++) {
+		shellInsert(L, d[k]);
+	}
+}
+//增量为d的排序
+void shellInsert(SqList &L, int d) {
+	int i, j;
+	for (i = d + 1; i <= L.length; i++) {	//为每一小序列排序
+		if (L.r[i] < L.r[i - d]) {
+			L.r[0] = L.r[i];
+			for (j = i - d; i > 0 && L.r[0] < L.r[j]; j = j - d) {		//在每个小序列中经行比较，后移直到插入位置
+				L.r[j + d] = L.r[j];
+			}
+			L.r[j + d] = L.r[0];
+		}
+	}
+}
+
+
+//冒泡排序
+void bubbleSort(SqList &L) {
+	int m = L.length - 1;
+	int temp;
+	bool flag = true;		//记录是否发生排序
+	while (m > 0 && flag == true) {
+		flag = false;		//先置零，发生交换再置，若没交换，不满足循环条件，就不进行循环
+		for (int j = 1; j <= m; j++) {
+			if (L.r[j] > L.r[j + 1]) {
+				flag = true;		//发生了交换
+				temp = L.r[j];
+				L.r[j] = L.r[j + 1];
+				L.r[j + 1] = temp;
+			}
+		}
+		m--;	//最后一个数确定为最大，下次不用进行比较
+	}
+}
+
+//快速排序,初值：low=1,high=L.length
+void quickSort(SqList &L,int low,int high) {
+	int mid;	//枢纽
+	if (low < high) {
+		mid = Partition(L, low, high);
+		quickSort(L, low, mid - 1);
+		quickSort(L, mid + 1, high);
+	}
+}
+//划分,对r[low~high]进行排序，返回划分的位置(下标)，使序列左端均小于划分，右端均大于划分
+int Partition(SqList &L, int low, int high) {
+	int key;		//如果有记录，用于存放记录的关键字，而r[0]存放整条记录
+	L.r[0] = L.r[low];
+	key = L.r[low];		
+	while (low < high) {	//两端向中间扫描，左端大于划分的数和右端小于划分的数进行交换
+		while (low < high&&L.r[high] >= key) {	
+			high--;
+		}
+		L.r[low] = L.r[high];
+		while (low < high&&L.r[low] <= key) {
+			low++;
+		}
+		L.r[high] = L.r[low];
+	}
+	L.r[low] = L.r[0];
+	return low;
+}
+
+//直接选择排序
+void selectSort(SqList &L) {
+	int min, temp;
+	for (int i = 1; i < L.length; i++) {
+		min = i;
+		for (int j = i + 1; j <= L.length; j++) {		//扫描比较
+			if (L.r[j] < L.r[min]) {
+				min = j;
+			}
+		}
+		if (min != i) {
+			temp = L.r[i];
+			L.r[i] = L.r[min];
+			L.r[min] = temp;
+		}
+	}
+}
+
+//堆排序
+//调整堆,r[s~m]调整为以r[s]为根的最大堆
+void adjustHeap(SqList &L, int s, int m) {
+	int rc = L.r[s];
+	for (int j = 2 * s; j <= m; j *= 2) {	//j表示从s开始的子结点
+		if (j < m&&L.r[j] < L.r[j + 1]) {	//两个子结点比较，选择大的那个节点向下
+			j++;
+		}
+		if (rc >= L.r[j]) {
+			break;		//如果rc比该节点小，说明这是插入位置，就退出循环
+		}
+		L.r[s] = L.r[j];
+		s = j;
+	}
+	L.r[s] = rc;
+}
+//初建大根堆，反复调用调整堆
+void createHeap(SqList &L) {
+	int n = L.length;
+	for (int i = n/2; i > 0; i--) {
+		adjustHeap(L, i, n);
+	}
+}
+//输入序列成为堆后，反复进行交换和调整堆
+void heapSort(SqList &L) {
+	int temp;
+	createHeap(L);		//将输入序列初建为大根堆
+	for (int i = L.length; i > 1; i--) {
+		temp = L.r[1];		//将堆顶和未排序的子序列最后一个进行交换
+		L.r[1] = L.r[i];
+		L.r[i] = temp;
+		adjustHeap(L, 1, i - 1);
+	}
+}
+
+//归并排序
+//归并相邻两个有序序列，将oldArr[low~mid]和oldArr[mid+1~high]两个部分比较，小的放入resArr[low~high]
+void Merge(int oldArr[], int resArr[], int low, int mid, int high) {
+	int i = low;
+	int j = mid + 1;
+	int k = low;
+	while (i <= mid && j <= high) {		//小的放入resArr
+		if (oldArr[i] <= oldArr[j]) {
+			resArr[k] = oldArr[i];
+			k++;
+			i++;
+		}
+		else {
+			resArr[k] = oldArr[j];
+			k++;
+			j++;
+		}
+	}
+	//当某一边放完后，剩下的直接放到resArr后面
+	while (i <= mid) {
+		resArr[k] = oldArr[i];
+		k++;
+		i++;
+	}
+	while (j <= high) {
+		resArr[k] = oldArr[j];
+		k++;
+		j++;
+	}
+}
+//运用递归重复调用Merge实现归并
+//将oldArr[]归并排序后放入resArr[]
+void MSort(int oldArr[], int resArr[], int low, int high) {
+	int mid;
+	int temp[100];
+	if (low == high) {
+		resArr[low] = oldArr[low];
+	}
+	else {
+		mid = (low + high) / 2;
+		MSort(oldArr, temp, low, mid);	//左边oldArr[low~mid]归并排序,放入temp[low~mid]中
+		MSort(oldArr, temp, mid + 1, high);	//右边左边oldArr[mid+1~high]归并排序,放入temp[mid+1~high]中
+		Merge(temp , resArr, low, mid, high);		//将temp[low~mid]和temp[mid+1~high]归并到resArr中
+	}
+}
+//传入顺序表进行排序
+void mergeSort(SqList &L) {
+	MSort(L.r, L.r, 1, L.length);
+}
